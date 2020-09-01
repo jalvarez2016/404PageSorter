@@ -12,27 +12,77 @@
         <script src="https://js13kgames.com/webxr-src/2020/three.js"></script>
 		<script>
 			// Our Javascript will go here.
-            var scene = new THREE.Scene();
-            var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+            let scene = new THREE.Scene();
+            let camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
-            var renderer = new THREE.WebGLRenderer();
+            let renderer = new THREE.WebGLRenderer();
             renderer.setSize( window.innerWidth, window.innerHeight );
             document.body.appendChild( renderer.domElement );
 
-            var geometry = new THREE.BoxGeometry();
-            var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-            var cube = new THREE.Mesh( geometry, material );
-            scene.add( cube );
+            //room specs
+            // size position rotation
+            let room = [
+                [10,8,1, 0,0,0, 0,0,0, "blue"],
+                [10,8,1, -5.5,0,5, 0,Math.PI/2,0, "grey"],
+                [10,8,1, 5.5,0,5, 0,Math.PI/2,0, "grey"],
+                [10,8,1, 0,0,10, 0,0,0, "grey"],
+                [10,1,10, 0,-3,5, 0,0,0, "white"],
+            ];
+            let walls = [];
+            //room creation
+            function createRoom(){
+                for(let i=0; i<room.length; i++){
+                    let piece = room[i];
+                    let wall = new THREE.Mesh( new THREE.BoxGeometry(piece[0], piece[1],piece[2]), new THREE.MeshBasicMaterial( { color: piece[9] } ) );
+                    
+                    // scene.add( wall );
+                    wall.position.x = piece[3];
+                    wall.position.y = piece[4];
+                    wall.position.z = piece[5];
+                    wall.rotation.x = piece[6];
+                    wall.rotation.y = piece[7];
+                    wall.rotation.z = piece[8];
+                    walls.push(wall);
+                    console.log(wall);
+                }
+                for(let j=0; j<walls.length;j++){
+                    scene.add(walls[j]);
+                }
+                console.log(walls);
+            }
+            createRoom();
 
-            camera.position.z = 5;
+            camera.position.z = 6;
+            // camera.position.y = 15;
+            document.addEventListener('mousemove', rotateCamera);
+
+            function rotateCamera(event){    
+                // console.log(camera.rotation);            
+                if(event.movementX != 0){
+                    camera.rotation.y -= (event.movementX/150);
+                } else if(event.movementY != 0){
+                    if(camera.rotation.x > -.8 && camera.rotation.x < 2){
+                        camera.rotation.x -= (event.movementY/150); 
+                    } else {
+                        if(camera.rotation.x < -.8){
+                            if(event.movementY < 0){
+                                camera.rotation.x -= event.movementY/150;
+                            }
+                        } else if(camera.rotation.x > 2){
+                            if(event.movementY > 0){
+                                camera.rotation.x -= event.movementY/150;
+                            }
+                        }
+                    }
+                }
+            }
 
             function animate() {
                 requestAnimationFrame( animate );
-                cube.rotation.x += 0.01;
-                cube.rotation.y += 0.01;
                 renderer.render( scene, camera );
             }
             animate();
+
 		</script>
 	</body>
 </html>
